@@ -57,7 +57,6 @@ jobs:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
       CCACHE_HARDLINK: "true"
-      BUILD_DATE: "${{ needs.Read-configuration.outputs.BUILD_DATE }}"
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -224,15 +223,16 @@ jobs:
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
+         echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
 
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
         with:
-         name: ${{ github.event.inputs.FEIL }}_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILD_DATE }}
+         name: ${{ github.event.inputs.FEIL }}_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: ./AnyKernel3/*
          
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-         name: ${{ github.event.inputs.FEIL }}_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILD_DATE }}
+         name: ${{ github.event.inputs.FEIL }}_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: kernel_workspace/kernel_platform/dist/Image
