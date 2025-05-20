@@ -56,6 +56,7 @@ jobs:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
       CCACHE_HARDLINK: "true"
+      BUILD_DATE: "${{ needs.Read-configuration.outputs.BUILD_DATE }}"
     steps:
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
@@ -226,11 +227,11 @@ jobs:
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
         with:
-         name: SuKiSu_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
+         name: OnePlus13_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}-${{ env.BUILD_DATE }}"
          path: ./AnyKernel3/*
          
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-         name: Image_SuKiSu_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}
+         name: OnePlus13_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}-${{ env.BUILD_DATE }}"
          path: kernel_workspace/kernel_platform/dist/Image
