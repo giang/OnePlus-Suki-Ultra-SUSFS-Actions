@@ -1,4 +1,4 @@
-name: Build OnePlus 13 SukiSU + SUSFS
+name: Build OnePlus 13 / Ace 5 Pro SukiSU + SUSFS
 on:
   workflow_dispatch:
     inputs:
@@ -7,9 +7,13 @@ on:
         required: true
         default: 'sm8750'
       FEIL:
+        type: choice
         description: "Model"
         required: true
         default: 'oneplus_13'
+        options: 
+         - oneplus_13
+         - oneplus_ace5_pro
       CPUD:
         description: "Mã điện thoại"
         required: true
