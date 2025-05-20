@@ -227,11 +227,11 @@ jobs:
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
         with:
-         name: OnePlus13_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}-${{ env.BUILD_DATE }}"
+         name: ${{ github.event.inputs.FEIL }}_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILD_DATE }}"
          path: ./AnyKernel3/*
          
       - name: Upload Image
         uses: actions/upload-artifact@v4
         with:
-         name: OnePlus13_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.FEIL }}-${{ env.BUILD_DATE }}"
+         name: ${{ github.event.inputs.FEIL }}_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILD_DATE }}"
          path: kernel_workspace/kernel_platform/dist/Image
