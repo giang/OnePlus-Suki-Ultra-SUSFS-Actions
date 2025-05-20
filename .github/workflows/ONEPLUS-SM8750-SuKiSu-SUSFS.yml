@@ -1,53 +1,50 @@
-name: 一加13构建
+name: Build OnePlus 13 SukiSU + SUSFS
 on:
   workflow_dispatch:
     inputs:
       CPU:
-        description: "分支"
+        description: "Nền tảng"
         required: true
         default: 'sm8750'
       FEIL:
-        description: "配置文件"
+        description: "Model"
         required: true
         default: 'oneplus_13'
       CPUD:
-        description: "处理器代号"
+        description: "Mã điện thoại"
         required: true
         default: 'sun'
       ANDROID_VERSION:
-        description: "内核安卓版本"
+        description: "Hệ điều hành"
         required: true
         default: 'android15'
       KERNEL_VERSION:
-        description: "内核版本"
+        description: "Phiên bản kernel"
         required: true
         default: '6.6'
       KERNEL_NAME:
-        description: "内核名称修改(中文不行)"
+        description: "Tên kernel"
         required: true
         default: '-android15-Giang-TechsReview'
       KERNEL_TIME:
-       description: "内核构建日期更改(默认为原厂)"
+       description: "Ngày build kernel"
        required: true
        default: '2025-05-20 23:36:49 UTC'
       enable_feature_x:
-       description: "是否启用kpm"
+       description: "Tích hợp kpm"
        required: false
        default: false
        type: boolean
       enable_feature_y:
-       description: "是否启用lz4kd"
+       description: "Tích hợp lz4kd"
        required: false
        default: false
        type: boolean
       enable_feature_z:
-       description: "是否添加风驰驱动"
+       description: "Tích hợp zram"
        required: false
        default: false
        type: boolean
-      
-       
-
 
 jobs:
   build:
