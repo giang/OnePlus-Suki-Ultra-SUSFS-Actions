@@ -3,9 +3,13 @@ on:
   workflow_dispatch:
     inputs:
       CPU:
+        type: choice
         description: "Nền tảng"
         required: true
         default: 'sm8750'
+        options: 
+         - sm8750
+         - sm8650
       FEIL:
         type: choice
         description: "Model"
@@ -14,18 +18,31 @@ on:
         options: 
          - oneplus_13
          - oneplus_ace5_pro
+         - oneplus_ace5
       CPUD:
+        type: choice
         description: "Mã điện thoại"
         required: true
         default: 'sun'
+        options: 
+         - sun
+         - pineapple
       ANDROID_VERSION:
+        type: choice
         description: "Hệ điều hành"
         required: true
         default: 'android15'
+        options: 
+         - android15
+         - android14
       KERNEL_VERSION:
+        type: choice
         description: "Phiên bản kernel"
         required: true
         default: '6.6'
+        options: 
+         - 6.6
+         - 6.1
       KERNEL_NAME:
         description: "Tên kernel"
         required: true
