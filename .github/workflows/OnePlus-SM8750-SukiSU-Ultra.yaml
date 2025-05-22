@@ -268,7 +268,7 @@ jobs:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
-            ./downloaded-artifacts/*.zip
+            ./downloaded-artifacts/*
           #  ./AnyKernel3/*.zip
           #  kernel_workspace/kernel_platform/dist/Image/*.zip
           generate_release_notes: true
