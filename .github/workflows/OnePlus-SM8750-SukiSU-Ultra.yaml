@@ -261,5 +261,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILD_DATE }}.${{ github.run_number }}
-          files: "${{ env.ANYKERNEL3_FILE }}.zip"
+          #files: "${{ env.ANYKERNEL3_FILE }}.zip"
+          files: |
+            ./AnyKernel3/*
+            kernel_workspace/kernel_platform/dist/Image/*
           generate_release_notes: true
