@@ -236,3 +236,13 @@ jobs:
         with:
          name: ${{ github.event.inputs.FEIL }}_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: kernel_workspace/kernel_platform/dist/Image
+
+      - name: 🧧 Create GitHub Release
+        env:
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_Image_SuKiSu_SUSFS_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        continue-on-error: true
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILD_DATE }}.${{ github.run_number }}
+          files: "./AnyKernel3/${{ env.ANYKERNEL3_FILE }}.zip"
+          generate_release_notes: true
