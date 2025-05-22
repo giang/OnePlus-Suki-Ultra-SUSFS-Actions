@@ -68,7 +68,7 @@ on:
        type: boolean
 
 jobs:
-  OP-Kernel-Building:
+  OnePlus-Kernel-Build:
     runs-on: ubuntu-latest
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
