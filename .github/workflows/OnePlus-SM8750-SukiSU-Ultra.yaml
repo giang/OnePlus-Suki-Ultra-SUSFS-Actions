@@ -265,7 +265,7 @@ jobs:
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILD_DATE }}.${{ github.run_number }}
+          tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             ./downloaded-artifacts/*.zip
