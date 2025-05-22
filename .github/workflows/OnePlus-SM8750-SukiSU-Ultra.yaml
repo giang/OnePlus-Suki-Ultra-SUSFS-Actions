@@ -256,7 +256,7 @@ jobs:
 
       - name: 🧧 Create GitHub Release
         env:
-          ANYKERNEL3_FILE: "${{ github.workspace }}/${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
