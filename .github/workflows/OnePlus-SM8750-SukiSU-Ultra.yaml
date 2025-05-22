@@ -50,8 +50,7 @@ on:
       KERNEL_TIME:
        description: "Ngày build kernel"
        required: true
-       default: '${{ github.event.repository.updated_at}}'
-       #default: '2025-05-20 23:36:49 UTC'
+       default: '2025-05-20 23:36:49 UTC'
       enable_feature_x:
        description: "Tích hợp kpm"
        required: false
