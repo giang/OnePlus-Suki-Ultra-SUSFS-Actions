@@ -253,6 +253,11 @@ jobs:
         with:
          name: ${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: kernel_workspace/kernel_platform/dist/Image
+         
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./downloaded-artifacts
 
       - name: 🧧 Create GitHub Release
         env:
@@ -262,7 +267,26 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILD_DATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
-          files: |
-            ./AnyKernel3/*
-            kernel_workspace/kernel_platform/dist/Image/*
+          #files: |
+          #  *.zip
+          #  ./AnyKernel3/*.zip
+          #  kernel_workspace/kernel_platform/dist/Image/*.zip
           generate_release_notes: true
+          
+      - name: Upload Release Assets Dynamically
+        run: |
+          for file in ./downloaded-artifacts/kernel-*/*; do
+              if [ -d "$file" ]; then
+                  continue
+              fi
+              echo "Uploading $file..."
+              gh release upload ${{ env.NEW_TAG }} "$file"
+              done
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEW_TAG: ${{ env.NEW_TAG }}
+
+      - name: Display Files Uploaded
+        run: |
+          echo "GitHub release created with the following files:"
+          ls ./downloaded-artifacts/**/*
