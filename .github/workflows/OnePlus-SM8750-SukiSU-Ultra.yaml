@@ -267,26 +267,9 @@ jobs:
         with:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILD_DATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
-          #files: |
-          #  *.zip
+          files: |
+            ./downloaded-artifacts/*.zip
           #  ./AnyKernel3/*.zip
           #  kernel_workspace/kernel_platform/dist/Image/*.zip
           generate_release_notes: true
-          
-      - name: Upload Release Assets Dynamically
-        run: |
-          for file in ./downloaded-artifacts/kernel-*/*; do
-              if [ -d "$file" ]; then
-                  continue
-              fi
-              echo "Uploading $file..."
-              gh release upload ${{ env.NEW_TAG }} "$file"
-              done
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEW_TAG: ${{ env.NEW_TAG }}
-
-      - name: Display Files Uploaded
-        run: |
-          echo "GitHub release created with the following files:"
-          ls ./downloaded-artifacts/**/*
+        
