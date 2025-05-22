@@ -68,7 +68,7 @@ on:
        type: boolean
 
 jobs:
-  build:
+  OP Kernel Building:
     runs-on: ubuntu-latest
     env:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
