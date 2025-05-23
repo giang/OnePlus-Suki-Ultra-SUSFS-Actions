@@ -284,7 +284,7 @@ jobs:
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
            cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ github.event.inputs.FEIL }}_boot.img
-           ls -R
+           #ls -R
 
       - name: 🧧 Create GitHub Release
         env:
