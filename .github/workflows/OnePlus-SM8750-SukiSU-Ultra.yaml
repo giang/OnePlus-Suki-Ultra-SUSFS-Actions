@@ -254,10 +254,10 @@ jobs:
          name: ${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: kernel_workspace/kernel_platform/dist/Image
          
-      - name: Download Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: ./downloaded-artifacts
+      - name: Checkout
+        uses: actions/checkout@v4
+          with:
+              fetch-depth: 0
 
       - name: 🧧 Create GitHub Release
         env:
@@ -268,8 +268,10 @@ jobs:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
-            ./downloaded-artifacts/*
-          #  ./AnyKernel3/*.zip
-          #  kernel_workspace/kernel_platform/dist/Image/*.zip
+            *.zip
+            ./*.zip
+            AnyKernel3/*.zip
+            ./AnyKernel3/*.zip
+            kernel_workspace/kernel_platform/dist/Image/*.zip
           generate_release_notes: true
         
