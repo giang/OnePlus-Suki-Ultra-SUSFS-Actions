@@ -276,10 +276,6 @@ jobs:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
-            ./download/*.zip
-            ./*.zip
-            AnyKernel3/*.zip
-            ./AnyKernel3/*.zip
-            kernel_workspace/kernel_platform/dist/Image/*.zip
+            /home/runner/work/OnePlus-Suki-Ultra-SUSFS-Actions/OnePlus-Suki-Ultra-SUSFS-Actions/download/*
           generate_release_notes: true
         
