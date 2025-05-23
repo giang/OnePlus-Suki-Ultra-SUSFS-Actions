@@ -264,18 +264,22 @@ jobs:
 
       - name: Download artifacts
         uses: actions/download-artifact@v4
+        with:
+          path: download
 
       - name: Copy AnyKernel3 & Image
         env:
           IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
-           mv -f ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
-           mv -f ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
+           cp -rf download/${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
+           cp -rf download/${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
            mk dir download
            cp -rf ${{ env.ANYKERNEL3_FILE }}.zip download/${{ env.ANYKERNEL3_FILE }}.zip
            cp -rf ${{ env.IMG_FILE }}.zip download/${{ env.IMG_FILE }}.zip
            cp kernel_workspace/kernel_platform/dist/Image download/${{ github.event.inputs.FEIL }}_Boot_Image.img
+           ls -R
+           ls -R download
            
       - name: Zip AnyKernel3
         run: |
