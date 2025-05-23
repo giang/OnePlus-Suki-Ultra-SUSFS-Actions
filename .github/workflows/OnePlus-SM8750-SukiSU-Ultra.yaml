@@ -245,14 +245,18 @@ jobs:
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
          cp kernel_workspace/kernel_platform/dist/Image ${{ env.IMG_FILE }}.img.gz
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+         
       - name: Upload AnyKernel3
-
+        env:
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
         with:
          name: ${{ env.ANYKERNEL3_FILE }}
          path: ./AnyKernel3/*
         
       - name: Upload Image
+        env:
+          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
         with:
          name: ${{ env.IMG_FILE }}
@@ -261,11 +265,14 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v4
 
-      - name: Copy AnyKernel3 & Image       
+      - name: Copy AnyKernel3 & Image
+        env:
+          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
            mv -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
            mv -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
-        
+           
       - name: Zip AnyKernel3
         run: |
           for dir in AnyKernel3-*; do
@@ -275,10 +282,10 @@ jobs:
             fi
           done
 
-      - name: Display structure of downloaded files
-        run: ls -R
-
       - name: 🧧 Create GitHub Release
+        env:
+          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
