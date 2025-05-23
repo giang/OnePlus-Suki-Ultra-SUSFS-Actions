@@ -235,17 +235,18 @@ jobs:
          mv oImage Image
          
       - name: Make AnyKernel3
+        env:
+          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
          git clone https://github.com/HanKuCha/AnyKernel3.git --depth=1      
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
+         cp kernel_workspace/kernel_platform/dist/Image ${{ env.IMG_FILE }}.img.gz
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
-
       - name: Upload AnyKernel3
-        env:
-          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
-          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+
         uses: actions/upload-artifact@v4
         with:
          name: ${{ env.ANYKERNEL3_FILE }}
@@ -285,5 +286,5 @@ jobs:
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             *.zip
-            kernel_workspace/kernel_platform/dist/*
+            kernel_workspace/kernel_platform/dist/Image
           generate_release_notes: true
