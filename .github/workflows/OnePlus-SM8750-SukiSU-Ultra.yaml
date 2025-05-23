@@ -270,8 +270,8 @@ jobs:
           IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
-           mv -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
-           mv -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
+           mv -f ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
+           mv -f ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
            
       - name: Zip AnyKernel3
         run: |
