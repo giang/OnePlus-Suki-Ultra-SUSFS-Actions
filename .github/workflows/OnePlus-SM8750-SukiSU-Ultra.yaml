@@ -243,6 +243,10 @@ jobs:
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
+         if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro" ]; then
+            cp kernel_workspace/kernel_platform/dist/dtbo.img ./AnyKernel3/
+            cp kernel_workspace/kernel_platform/dist/system_dlkm.erofs.img ./AnyKernel3/system_dlkm.img
+         fi
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
          
       - name: Upload AnyKernel3
@@ -272,6 +276,10 @@ jobs:
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
            cd download
+           # Fengchi Patch for OPAce5Pro
+           if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro" ]; then
+             sed -i 's/hmbird/xxbird/g' dtbo.img
+           fi
            zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}/${{ env.IMG_FILE }}/*
            zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }}/${{ env.ANYKERNEL3_FILE }}/*
            cp ../kernel_workspace/kernel_platform/dist/Image ${{ github.event.inputs.FEIL }}_Boot_Image.img
