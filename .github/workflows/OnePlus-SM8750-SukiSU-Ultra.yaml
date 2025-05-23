@@ -241,6 +241,7 @@ jobs:
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+         mkdir ./download
 
       - name: Upload AnyKernel3
         uses: actions/upload-artifact@v4
@@ -253,11 +254,18 @@ jobs:
         with:
          name: ${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: kernel_workspace/kernel_platform/dist/Image
-         
-      - name: Checkout
-        uses: actions/checkout@v4
+
+      - name: Download AnyKernel3
+        uses: actions/download-artifact@v4
         with:
-          fetch-depth: 0
+         name: ${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
+         path: ./download
+
+      - name: Download Image
+        uses: actions/download-artifact@v4
+        with:
+         name: ${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
+         path: ./download
 
       - name: 🧧 Create GitHub Release
         env:
@@ -268,7 +276,7 @@ jobs:
           tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
-            *.zip
+            ./download/*.zip
             ./*.zip
             AnyKernel3/*.zip
             ./AnyKernel3/*.zip
