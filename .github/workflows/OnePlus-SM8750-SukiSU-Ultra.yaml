@@ -288,4 +288,5 @@ jobs:
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             download/*.zip
+            download/*.img
           generate_release_notes: true
