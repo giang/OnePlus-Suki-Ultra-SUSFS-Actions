@@ -278,7 +278,6 @@ jobs:
         run: ls -R
 
       - name: 🧧 Create GitHub Release
-        env:
         continue-on-error: true
         uses: softprops/action-gh-release@v1
         with:
@@ -288,4 +287,3 @@ jobs:
             *.zip
             kernel_workspace/kernel_platform/dist/*
           generate_release_notes: true
-        
