@@ -274,7 +274,6 @@ jobs:
         run: |
            cp -rf download/${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
            cp -rf download/${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
-           mk dir download
            cp -rf ${{ env.ANYKERNEL3_FILE }}.zip download/${{ env.ANYKERNEL3_FILE }}.zip
            cp -rf ${{ env.IMG_FILE }}.zip download/${{ env.IMG_FILE }}.zip
            cp kernel_workspace/kernel_platform/dist/Image download/${{ github.event.inputs.FEIL }}_Boot_Image.img
