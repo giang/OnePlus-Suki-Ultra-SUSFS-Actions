@@ -280,8 +280,9 @@ jobs:
            if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro" ]; then
              sed -i 's/hmbird/xxbird/g' dtbo.img
            fi
-           zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}/${{ env.IMG_FILE }}/*
-           zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }}/${{ env.ANYKERNEL3_FILE }}/*
+           cd ..
+           cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
+           cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
            cp ../kernel_workspace/kernel_platform/dist/Image ${{ github.event.inputs.FEIL }}_Boot_Image.img
            ls -R
 
