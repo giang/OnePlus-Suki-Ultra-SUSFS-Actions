@@ -258,13 +258,13 @@ jobs:
          name: ${{ env.IMG_FILE }}
          path: kernel_workspace/kernel_platform/dist/Image
 
-      - name: Copy AnyKernel3 & Image       
-        run: |
-           cp -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
-            cp -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
-
       - name: Download artifacts
         uses: actions/download-artifact@v4
+
+      - name: Copy AnyKernel3 & Image       
+        run: |
+           mv -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
+           mv -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
         
       - name: Zip AnyKernel3
         run: |
