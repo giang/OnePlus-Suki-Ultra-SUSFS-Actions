@@ -243,7 +243,6 @@ jobs:
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
-         cp kernel_workspace/kernel_platform/dist/Image ${{ env.IMG_FILE }}.img.gz
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
          
       - name: Upload AnyKernel3
@@ -267,27 +266,16 @@ jobs:
         with:
           path: download
 
-      - name: Copy AnyKernel3 & Image
+      - name: Zip AnyKernel3 & Image
         env:
           IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
-           cp -rf download/${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
-           cp -rf download/${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
-           cp -rf ${{ env.ANYKERNEL3_FILE }}.zip download/${{ env.ANYKERNEL3_FILE }}.zip
-           cp -rf ${{ env.IMG_FILE }}.zip download/${{ env.IMG_FILE }}.zip
+           cd download
+           zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}
+           zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }} 
            cp kernel_workspace/kernel_platform/dist/Image download/${{ github.event.inputs.FEIL }}_Boot_Image.img
-           ls -R
            ls -R download
-           
-      - name: Zip AnyKernel3
-        run: |
-          for dir in AnyKernel3-*; do
-            if [ -d "$dir" ]; then
-              echo "----- Zip $dir -----"
-              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
-            fi
-          done
 
       - name: 🧧 Create GitHub Release
         env:
@@ -300,9 +288,4 @@ jobs:
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             download/*.zip
-            ./download/.zip
-            download/*
-            ./*.zip
-            *.zip
-            kernel_workspace/kernel_platform/dist/Image
           generate_release_notes: true
