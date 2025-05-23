@@ -258,7 +258,7 @@ jobs:
         with:
          name: ${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: ./download
-         run:
+         run: |
            cp -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
         
       - name: Upload Image
@@ -276,7 +276,7 @@ jobs:
         with:
          name: ${{ env.ANYKERNEL3_FILE }}
          path: ./download
-         run:
+         run: |
            cp -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
 
       - name: 🧧 Create GitHub Release
