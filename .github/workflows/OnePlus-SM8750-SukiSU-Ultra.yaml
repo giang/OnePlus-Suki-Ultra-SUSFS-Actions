@@ -272,8 +272,8 @@ jobs:
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
            cd download
-           zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}/*
-           zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }}/*
+           zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}/${{ env.IMG_FILE }}/*
+           zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }}/${{ env.ANYKERNEL3_FILE }}/*
            cp ../kernel_workspace/kernel_platform/dist/Image ${{ github.event.inputs.FEIL }}_Boot_Image.img
            ls -R
 
