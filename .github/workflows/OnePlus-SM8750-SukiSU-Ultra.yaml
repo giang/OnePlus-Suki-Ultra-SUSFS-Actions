@@ -224,7 +224,7 @@ jobs:
            export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
            cd kernel_workspace/kernel_platform
            tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-           ls -R kernel_workspace/kernel_platform/dist
+           ls -R dist
            
       - name: Make AnyKernel3
         run: |
