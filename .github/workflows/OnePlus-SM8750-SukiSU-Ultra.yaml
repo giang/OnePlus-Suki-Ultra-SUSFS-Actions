@@ -275,7 +275,7 @@ jobs:
            zip -r  ${{ env.IMG_FILE }}.zip ${{ env.IMG_FILE }}
            zip -r  ${{ env.ANYKERNEL3_FILE }}.zip ${{ env.ANYKERNEL3_FILE }} 
            cp ../kernel_workspace/kernel_platform/dist/Image ${{ github.event.inputs.FEIL }}_Boot_Image.img
-           ls -R download
+           ls -R
 
       - name: 🧧 Create GitHub Release
         env:
