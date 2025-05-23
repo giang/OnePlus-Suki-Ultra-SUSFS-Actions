@@ -281,10 +281,9 @@ jobs:
            #if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro" ]; then
            #  sed -i 's/hmbird/xxbird/g' dtbo.img
            #fi
-           cd ..
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
-           cp ../kernel_workspace/kernel_platform/dist/Image ${{ github.event.inputs.FEIL }}_Boot_Image.img
+           cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ github.event.inputs.FEIL }}_boot.img
            ls -R
 
       - name: 🧧 Create GitHub Release
