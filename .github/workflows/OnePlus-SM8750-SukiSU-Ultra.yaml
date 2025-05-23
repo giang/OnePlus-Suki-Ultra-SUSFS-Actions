@@ -298,6 +298,7 @@ jobs:
           files: |
             download/*.zip
             ./download/.zip
+            download/*
             ./*.zip
             *.zip
             kernel_workspace/kernel_platform/dist/Image
