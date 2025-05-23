@@ -258,8 +258,6 @@ jobs:
         with:
          name: ${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}
          path: ./download
-         run: |
-           cp -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip
         
       - name: Upload Image
         env:
@@ -276,8 +274,15 @@ jobs:
         with:
          name: ${{ env.ANYKERNEL3_FILE }}
          path: ./download
-         run: |
+
+      - name: Copy AnyKernel3 & Image
+        env:
+          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"          
+        run: |
+           cd ./download
            cp -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
+            cp -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
 
       - name: 🧧 Create GitHub Release
         env:
