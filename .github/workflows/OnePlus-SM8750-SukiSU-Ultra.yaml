@@ -284,6 +284,21 @@ jobs:
            cp -rf ${{ env.IMG_FILE }} ${{ env.IMG_FILE }}.zip
             cp -rf ${{ env.ANYKERNEL3_FILE }} ${{ env.ANYKERNEL3_FILE }}.zip          
 
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        
+      - name: Zip AnyKernel3
+        run: |
+          for dir in AnyKernel3-*; do
+            if [ -d "$dir" ]; then
+              echo "----- Zip $dir -----"
+              (cd $dir && zip -r9 "$dir".zip ./* -x .git .gitignore ./*.zip && mv *.zip ..)
+            fi
+          done
+
+      - name: Display structure of downloaded files
+        run: ls -R
+
       - name: 🧧 Create GitHub Release
         env:
           ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
@@ -294,5 +309,7 @@ jobs:
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             ./download/*.zip
+            *.zip
+            kernel_workspace/kernel_platform/dist/Image/*
           generate_release_notes: true
         
