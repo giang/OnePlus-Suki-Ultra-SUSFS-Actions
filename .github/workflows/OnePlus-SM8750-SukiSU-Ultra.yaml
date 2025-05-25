@@ -17,9 +17,10 @@ on:
         default: 'oneplus_13'
         options: 
          - oneplus_13
-         - oneplus_13_v
+         - JiuGeFaCai_oneplus_13_v
+         - oneplus_13t
          - oneplus_ace5_pro
-         - oneplus_ace5_pro_v
+         - JiuGeFaCai_oneplus_ace5_pro_v
          - oneplus_ace5
       CPUD:
         type: choice
