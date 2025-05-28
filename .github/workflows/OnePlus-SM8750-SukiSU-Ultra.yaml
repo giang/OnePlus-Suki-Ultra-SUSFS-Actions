@@ -94,7 +94,7 @@ jobs:
       - name: Install dependencies
         run: |
          sudo apt update && sudo apt upgrade -y
-         sudo apt install -y python3 git curl
+         sudo apt install -y python3 git curl libelf-dev
 
       - name: Install repo tool
         run: |
@@ -138,15 +138,83 @@ jobs:
            # Apply patches
            cd ./common
 
-           #if [ ${{ github.event.inputs.FEIL }} == "oneplus_13" || ${{ github.event.inputs.FEIL }} == "oneplus_13_v"  ]; then
-           #  sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
-           #  sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
-           #fi
+           if [ ${{ github.event.inputs.FEIL }} == "oneplus_13" || ${{ github.event.inputs.FEIL }} == "oneplus_13_v"  ]; then
+             sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
+             sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
+           fi
 
            patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
            patch -p1 -F 3 < syscall_hooks.patch
            echo "完成"
+
+      - name: Apply HMBird GKI patch
+        run: |
+         cd kernel_workspace/kernel_platform/common/drivers
+         cat << 'EOF' > hmbird_patch.c
+         #include <linux/init.h>
+         #include <linux/module.h>
+         #include <linux/of.h>
+         #include <linux/slab.h>
+         #include <linux/string.h>
+
+         static int hmbird_read_version_type(void)
+         +{
+         +	struct device_node *node;
+         +	const char *type_str;
+         +	int ret = -EINVAL;
+         +
+         +	/* Find the oplus,hmbird node in device tree */
+         +	node = of_find_node_by_path("/soc/oplus,hmbird");
+         +	if (!node) {
+         +		pr_info("hmbird: No oplus,hmbird node found in device tree\n");
+         +		return ret;
+         +	}
+         +
+         +	/* Read the version_type/type property */
+         +	ret = of_property_read_string(of_get_child_by_name(node, "version_type"), 
+         +				"type", &type_str);
+         +	if (ret) {
+         +		pr_info("hmbird: Failed to read version_type/type from device tree\n");
+         +		of_node_put(node);
+         +		return ret;
+         +	}
+         +
+         +	/* Store the version type */
+         +	strlcpy(hmbird_version_type, type_str, sizeof(hmbird_version_type));
+         +	pr_info("hmbird: Version type from device tree: %s\n", hmbird_version_type);
+         +	
+         +	of_node_put(node);
+         +	return 0;
+         +}
+         +
+         +EXPORT_SYMBOL(hmbird_check_version_type);
+ 
+         static int set_proc_buf_val(struct file *file, const char __user *buf, size_t count, int *val)
+         {
+         @@ -376,7 +432,15 @@ static int hmbird_proc_init(void)
+ 
+         static int __init hmbird_common_init(void)
+         {
+         +	int ret;
+         +	
+         +	/* Read hmbird version type from device tree */
+         +	ret = hmbird_read_version_type();
+         +	if (ret) {
+         +		pr_warn("hmbird: Failed to read version type from device tree, defaulting to non-GKI\n");
+         +		/* Default to HMBIRD_OGKI if we can't read from device tree */
+         +		 strlcpy(hmbird_version_type, "HMBIRD_OGKI", sizeof(hmbird_version_type));
+         +	}
+         +	
+            return hmbird_proc_init();
+         }
+         EOF
+         if ! grep -q "hmbird_patch.o" Makefile; then
+         echo "obj-y += hmbird_patch.o" >> Makefile
+         fi
+         cd ../../../
+         git add -A
+         git commit -m "Add HMBird GKI patch" || true
 
       - name: Apply lz4kd Patches
         if: ${{inputs.enable_feature_y }}
@@ -185,6 +253,7 @@ jobs:
           echo "CONFIG_CRYPTO_LZ4K=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_LZ4KD=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_842=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
           
           #Remove check_defconfig
           sudo sed -i 's/check_defconfig//' ./common/build.config.gki
@@ -225,13 +294,17 @@ jobs:
       - name: Build Kernel
         run: |
            export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
-           cd kernel_workspace/kernel_platform
-           tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-           ls -R dist
+           export PATH="/home/runner/work/${{ github.jobs[github.job].name }}/${{ github.jobs[github.job].name }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
+           cd kernel_workspace/kernel_platform/common
+           make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
+           #cd kernel_workspace/kernel_platform
+           #tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
            
-      - name: Make AnyKernel3
+           #ls -R dist
+           
+      - name: Apply Linux Patch
         run: |
-         cd kernel_workspace/kernel_platform/dist/
+         cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
          chmod +x patch_linux
          ./patch_linux
