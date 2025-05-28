@@ -63,7 +63,7 @@ on:
        default: false
        type: boolean
       enable_feature_z:
-       description: "Tích hợp zram"
+       description: "Tích hợp Fengchi"
        required: false
        default: false
        type: boolean
