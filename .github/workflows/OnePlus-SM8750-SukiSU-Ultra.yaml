@@ -149,7 +149,7 @@ jobs:
            echo "完成"
 
       - name: Apply HMBird GKI patch
-        if: ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro"
+        if: ${{ github.event.inputs.FEIL == 'oneplus_ace5_pro' }}
         run: |
          cd kernel_workspace/kernel_platform/common/drivers
          cat << 'EOF' > hmbird_patch.c
@@ -219,7 +219,7 @@ jobs:
  
 
       - name: Apply lz4kd Patches
-        if: ${{inputs.enable_feature_y }} == true
+        if: ${{ inputs.enable_feature_y == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform/common
             cp ../../SukiSU_patch/other/zram/zram_patch/${{ github.event.inputs.KERNEL_VERSION }}/lz4kd.patch ./
@@ -262,7 +262,7 @@ jobs:
           git add -A && git commit -a -m "BUILD Kernel"
       
       - name: Add KPM Configuration Settings
-        if: ${{inputs.enable_feature_x }} == true
+        if: ${{ inputs.enable_feature_x == 'true' }}
         run: |
           cd kernel_workspace/kernel_platform
           echo "CONFIG_KPM=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -282,7 +282,7 @@ jobs:
          sudo echo "echo "${{ github.event.inputs.KERNEL_NAME }}"" >> setlocalversion
 
       - name: Add Fengchi
-        if: ${{inputs.enable_feature_z }} == true
+        if: ${{inputs.enable_feature_z == 'true' }}
         run: |
          cd kernel_workspace/kernel_platform/
          git clone https://github.com/HanKuCha/sched_ext.git
