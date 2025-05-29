@@ -55,17 +55,17 @@ on:
       enable_feature_x:
        description: "Tích hợp KPM"
        required: false
-       default: true
+       default: false
        type: boolean
       enable_feature_y:
        description: "Tích hợp LZ4KD"
        required: false
-       default: true
+       default: false
        type: boolean
       enable_feature_z:
        description: "Tích hợp Fengchi"
        required: false
-       default: true
+       default: false
        type: boolean
 
 jobs:
