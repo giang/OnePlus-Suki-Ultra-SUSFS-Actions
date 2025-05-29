@@ -53,19 +53,19 @@ on:
        required: true
        default: '2025-05-20 23:36:49 UTC'
       enable_feature_x:
-       description: "Tích hợp kpm"
+       description: "Tích hợp KPM"
        required: false
-       default: false
+       default: true
        type: boolean
       enable_feature_y:
-       description: "Tích hợp lz4kd"
+       description: "Tích hợp LZ4KD"
        required: false
-       default: false
+       default: true
        type: boolean
       enable_feature_z:
-       description: "Tích hợp zram"
+       description: "Tích hợp Fengchi"
        required: false
-       default: false
+       default: true
        type: boolean
 
 jobs:
