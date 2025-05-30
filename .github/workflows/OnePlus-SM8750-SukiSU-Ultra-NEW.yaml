@@ -143,8 +143,7 @@ jobs:
            cd ./common
            
            MODEL="${{ github.event.inputs.FEIL }}"
-           CPUX="${{ github.event.inputs.CPU }}"
-           if [ "$CPUX" == "sm8750" || "$MODEL" != "oneplus_13t" ]; then
+           if [ "$MODEL" == *"oneplus_13"* ]; then
              FILENAME="50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch"
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
              sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
