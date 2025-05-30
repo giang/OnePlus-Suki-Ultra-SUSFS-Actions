@@ -77,24 +77,35 @@ jobs:
       CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
       CCACHE_NOHASHDIR: "true"
       CCACHE_HARDLINK: "true"
-      RELEASE_NAME: "TEST ONLY - GKI/SukiSU Ultra/SUSFS"
-      RELEASE_NOTES: |
-        This release contains SukiSU Ultra and SUSFS for "${{ inputs.FEIL }}"
-        
-        Features:
-        -> SukiSU Ultra | KPM | LZ4KD | Fengchi
-        -> SUSFS ඞ
-        -> Manual Hooks for Better Hiding
-
-        Notes:
-        -> SUS SU Mode 2 will show as disabled or not compatble due to non-kprobe hooks and is not needed anymore!
-        -> Kernel Flasher is broken with latest susfs, try https://github.com/libxzr/HorizonKernelFlasher!
-
-        Module:
-        -> SukiSU Ultra Manager v3.1.3: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.3/SukiSU_v3.1.3_12905-release.apk
-        -> SUSFS Module: https://github.com/sidex15/ksu_module_susfs
-        
+    
     steps:
+      - name: Set formatted model name
+        run: |
+         case "${{ github.event.inputs.FEIL }}" in
+           oneplus_13)
+            MODEL_NAME="Oneplus 13"
+            ;;
+           oneplus_13_v)
+            MODEL_NAME="Oneplus 13 (Android 15)"
+            ;;
+          oneplus_13t)
+             MODEL_NAME="Oneplus 13T"
+            ;;
+           oneplus_ace5)
+             MODEL_NAME="Oneplus Ace 5"
+             ;;
+           oneplus_ace5_pro)
+            MODEL_NAME="Oneplus Ace 5 Pro"
+            ;;
+           oneplus_ace5_pro_v)
+            MODEL_NAME="Oneplus Ace 5 Pro (Android 15)"
+            ;;
+           *)
+            MODEL_NAME="Unknown Model"
+            ;;
+         esac
+         echo "FEIL_NAME=$MODEL_NAME" >> "$GITHUB_ENV"
+          
       - name: Maximize build space
         uses: easimon/maximize-build-space@master
         with:
@@ -393,12 +404,27 @@ jobs:
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
            cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
-           #ls -R
 
       - name: 🧧 Create GitHub Release
         env:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          RELEASE_NAME: "${{env.FEIL_NAME}} Kernel - GKI/SukiSU Ultra/SUSFS"
+          RELEASE_NOTES: |
+           This release contains SukiSU Ultra and SUSFS for ${{ env.FEIL_NAME }}
+           
+           Features:
+           -> SukiSU Ultra | KPM | LZ4KD | Fengchi
+           -> SUSFS ඞ
+           -> Manual Hooks for Better Hiding
+           
+           Notes:
+           -> SUS SU Mode 2 will show as disabled or not compatble due to non-kprobe hooks and is not needed anymore!
+           -> Kernel Flasher is broken with latest susfs, try https://github.com/libxzr/HorizonKernelFlasher!
+           
+           Module:
+           -> SukiSU Ultra Manager v3.1.3: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.3/SukiSU_v3.1.3_12905-release.apk
+           -> SUSFS Module: https://github.com/sidex15/ksu_module_susfs
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
