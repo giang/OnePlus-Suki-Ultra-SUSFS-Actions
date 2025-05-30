@@ -126,7 +126,7 @@ jobs:
            git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
            git clone https://github.com/ShirkNeko/SukiSU_patch.git
 
-           cd kernel_platform        
+           cd kernel_platform
            cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
            cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
            cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
@@ -288,12 +288,12 @@ jobs:
           
       - name: Add kernel custom name
         run: |
-         #cd kernel_workspace/kernel_platform
+         cd kernel_workspace/kernel_platform
+         sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
+         sudo sed -i 's/-4k/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
+         
          #sed -i 's/res="\$res\$(cat "\$file")"/res="-android15-8-g013ec21bba94-abogki383916444"/g' ./common/scripts/setlocalversion
          #sudo sed -i 's/-android15-8-g013ec21bba94-abogki383916444/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/scripts/setlocalversion
-         cd kernel_workspace/kernel_platform/common/scripts
-         echo | sudo tee setlocalversion
-         sudo echo "echo "${{ github.event.inputs.KERNEL_NAME }}"" >> setlocalversion
 
       - name: Add Fengchi
         if: ${{inputs.enable_feature_z }}
@@ -310,6 +310,7 @@ jobs:
            #if [ "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro"]; then
            export PATH="/home/runner/work/${{ github.jobs[github.job].name }}/${{ github.jobs[github.job].name }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
            export PATH="/usr/lib/ccache:$PATH"
+           sudo apt install libelf-dev
            cd kernel_workspace/kernel_platform/common
            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
            #else
@@ -321,11 +322,7 @@ jobs:
            
       - name: Apply Linux Patch
         run: |
-         if [ "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro"]; then
-           cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
-         else
-           cd kernel_workspace/kernel_platform/dist/
-         fi
+         cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
          chmod +x patch_linux
          ./patch_linux
