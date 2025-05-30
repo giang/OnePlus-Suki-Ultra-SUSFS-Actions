@@ -287,11 +287,11 @@ jobs:
       - name: Add kernel custom name
         run: |
          cd kernel_workspace/kernel_platform
-         sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
-         sudo sed -i 's/-4k/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
+         #sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
+         #sudo sed -i 's/-4k/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
          
-         #sed -i 's/res="\$res\$(cat "\$file")"/res="-android15-8-g013ec21bba94-abogki383916444"/g' ./common/scripts/setlocalversion
-         #sudo sed -i 's/-android15-8-g013ec21bba94-abogki383916444/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/scripts/setlocalversion
+         sed -i 's/res="\$res\$(cat "\$file")"/res="-android15-8-g013ec21bba94-abogki383916444"/g' ./common/scripts/setlocalversion
+         sudo sed -i 's/-android15-8-g013ec21bba94-abogki383916444/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/scripts/setlocalversion
 
       - name: Add Fengchi
         if: ${{inputs.enable_feature_z }}
