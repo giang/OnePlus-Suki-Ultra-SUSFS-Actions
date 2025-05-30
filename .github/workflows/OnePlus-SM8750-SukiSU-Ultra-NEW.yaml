@@ -79,7 +79,7 @@ jobs:
       CCACHE_HARDLINK: "true"
       RELEASE_NAME: "TEST ONLY - GKI/SukiSU Ultra/SUSFS"
       RELEASE_NOTES: |
-        This release contains SukiSU Ultra and SUSFS
+        This release contains SukiSU Ultra and SUSFS for "${{ inputs.FEIL }}"
         
         Features:
         -> SukiSU Ultra
