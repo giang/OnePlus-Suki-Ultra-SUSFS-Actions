@@ -139,10 +139,12 @@ jobs:
            cp -r ../SukiSU_patch/other/zram/lz4k_oplus ./common/lib/
            # Apply patches
            cd ./common
-           
-           if [[ "${{ github.event.inputs.CPU }}" == "sm8750" ]]; then
-              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
-              sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
+
+           CPUX="${{ github.event.inputs.CPU }}"
+           if [ "$CPUX" == "sm8750" ]; then
+             FILENAME="50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch"
+             sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
+             sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
            fi
 
            patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
@@ -319,7 +321,8 @@ jobs:
            
       - name: Apply Linux Patch
         run: |
-         if [[ "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro" ]]; then
+         MODEL="${{ github.event.inputs.FEIL }}"
+         if [ "$MODEL" == "oneplus_ace5_pro" ]; then
              cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
          else
              cd kernel_workspace/kernel_platform/dist/
