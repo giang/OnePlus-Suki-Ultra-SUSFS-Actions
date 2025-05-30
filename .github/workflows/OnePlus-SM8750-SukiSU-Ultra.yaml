@@ -149,7 +149,7 @@ jobs:
            echo "完成"
 
       - name: Apply HMBird GKI patch
-        if: ${{ "github.event.inputs.FEIL" == "oneplus_ace5_pro" }}
+        if: ${{ github.event.inputs.FEIL == 'oneplus_ace5_pro' }} 
         run: |
          cd kernel_workspace/kernel_platform/common/drivers
          cat << 'EOF' > hmbird_patch.c
