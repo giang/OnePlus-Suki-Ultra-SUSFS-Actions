@@ -138,10 +138,10 @@ jobs:
            # Apply patches
            cd ./common
 
-           #if [ ${{ github.event.inputs.FEIL }} == "oneplus_13" || ${{ github.event.inputs.FEIL }} == "oneplus_13_v"  ]; then
+           if [ "${{ github.event.inputs.FEIL }}" == "oneplus_13" || "${{ github.event.inputs.FEIL }}" == "oneplus_13_v"  ]; then
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
              sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
-           #fi
+           fi
 
            patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
@@ -149,7 +149,7 @@ jobs:
            echo "完成"
 
       - name: Apply HMBird GKI patch
-        if: ${{ github.event.inputs.FEIL == 'oneplus_ace5_pro' }}
+        if: ${{ "github.event.inputs.FEIL" == "oneplus_ace5_pro" }}
         run: |
          cd kernel_workspace/kernel_platform/common/drivers
          cat << 'EOF' > hmbird_patch.c
@@ -233,7 +233,7 @@ jobs:
  
 
       - name: Apply lz4kd Patches
-        if: ${{ inputs.enable_feature_y == 'true' || inputs.enable_feature_y == true }}
+        if: ${{ inputs.enable_feature_y }}
         run: |
           cd kernel_workspace/kernel_platform/common
             cp ../../SukiSU_patch/other/zram/zram_patch/${{ github.event.inputs.KERNEL_VERSION }}/lz4kd.patch ./
@@ -276,7 +276,7 @@ jobs:
           git add -A && git commit -a -m "BUILD Kernel"
       
       - name: Add KPM Configuration Settings
-        if: ${{ inputs.enable_feature_x == 'true' || inputs.enable_feature_x == true }}
+        if: ${{ inputs.enable_feature_x }}
         run: |
           cd kernel_workspace/kernel_platform
           echo "CONFIG_KPM=y" >> ./common/arch/arm64/configs/gki_defconfig
@@ -296,7 +296,7 @@ jobs:
          sudo echo "echo "${{ github.event.inputs.KERNEL_NAME }}"" >> setlocalversion
 
       - name: Add Fengchi
-        if: ${{inputs.enable_feature_z == 'true' || inputs.enable_feature_z == true }}
+        if: ${{inputs.enable_feature_z }}
         run: |
          cd kernel_workspace/kernel_platform/
          git clone https://github.com/HanKuCha/sched_ext.git
@@ -312,24 +312,24 @@ jobs:
       - name: Build Kernel
         run: |
            export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
-           #if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro"]; then
+           if [ "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro"]; then
              export PATH="/home/runner/work/${{ github.jobs[github.job].name }}/${{ github.jobs[github.job].name }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
              cd kernel_workspace/kernel_platform/common
              make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
-           #else
-           #cd kernel_workspace/kernel_platform
-           #tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-           #fi
+           else
+             cd kernel_workspace/kernel_platform
+             tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
+           fi
            
            #ls -R dist
            
       - name: Apply Linux Patch
         run: |
-         #if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro"]; then
-         #  cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
-         #else
-         cd kernel_workspace/kernel_platform/dist/
-         #fi
+         if [ "${{ github.event.inputs.FEIL }}" == "oneplus_ace5_pro"]; then
+           cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
+         else
+           cd kernel_workspace/kernel_platform/dist/
+         fi
          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
          chmod +x patch_linux
          ./patch_linux
