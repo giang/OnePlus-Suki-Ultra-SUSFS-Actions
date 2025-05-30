@@ -324,11 +324,11 @@ jobs:
       - name: Apply Linux Patch
         run: |
          MODEL="${{ inputs.FEIL }}"
-         if [[ "$MODEL" == "oneplus_ace5_pro" ]]; then
-             cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
-         else
-             cd kernel_workspace/kernel_platform/dist/
-         fi
+         #if [[ "$MODEL" == "oneplus_ace5_pro" ]]; then
+         #    cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
+         #else
+         cd kernel_workspace/kernel_platform/dist/
+         #fi
          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
          chmod +x patch_linux
          ./patch_linux
