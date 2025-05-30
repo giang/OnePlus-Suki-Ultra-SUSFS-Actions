@@ -302,17 +302,11 @@ jobs:
          rm -rf ./sched_ext/.git
          cd common/kernel/sched
 
-        - name: Set Kernel build timestamp
+      - name: Set Kernel build timestamp
         run: |
           export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
           echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
           
-      - name: Build Kernel
-        run: |
-           export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
-           cd kernel_workspace/kernel_platform
-           tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-           
       - name: Build Kernel
         run: |
            #export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
@@ -327,7 +321,7 @@ jobs:
            
       - name: Apply Linux Patch
         run: |
-         cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
+         cd kernel_workspace/kernel_platform/dist/
          curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
          chmod +x patch_linux
          ./patch_linux
