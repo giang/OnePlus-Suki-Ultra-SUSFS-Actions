@@ -138,7 +138,7 @@ jobs:
            # Apply patches
            cd ./common
            
-           if [[ ${{ github.event.inputs.FEIL }} == "oneplus_13" || ${{ github.event.inputs.FEIL }} == "oneplus_13_v" ]] then
+           if [[ ${{ github.event.inputs.CPU }} == "sm8750" ]] then
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
              sed -i '/#include <trace\/hooks\/fs.h>/d' 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch
            fi
@@ -311,12 +311,6 @@ jobs:
           
       - name: Build Kernel
         run: |
-           #export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
-           #export PATH="/home/runner/work/${{ github.jobs[github.job].name }}/${{ github.jobs[github.job].name }}/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-           #export PATH="/usr/lib/ccache:$PATH"
-           #sudo apt install libelf-dev
-           #cd kernel_workspace/kernel_platform/common
-           #make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
            export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
            cd kernel_workspace/kernel_platform
            tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
@@ -343,10 +337,7 @@ jobs:
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
-         #if [ ${{ github.event.inputs.FEIL }} == "oneplus_ace5_pro" ]; then
-         #   cp kernel_workspace/kernel_platform/dist/dtbo.img ./AnyKernel3/
-         #   cp kernel_workspace/kernel_platform/dist/system_dlkm.erofs.img ./AnyKernel3/system_dlkm.img
-         #fi
+         
          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
          
       - name: Upload AnyKernel3
