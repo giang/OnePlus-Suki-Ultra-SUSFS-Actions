@@ -82,7 +82,7 @@ jobs:
         This release contains SukiSU Ultra and SUSFS for "${{ inputs.FEIL }}"
         
         Features:
-        -> SukiSU Ultra
+        -> SukiSU Ultra | KPM | LZ4KD | Fengchi
         -> SUSFS ඞ
         -> Manual Hooks for Better Hiding
 
