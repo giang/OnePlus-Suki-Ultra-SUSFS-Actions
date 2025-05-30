@@ -314,6 +314,7 @@ jobs:
         run: |
           export SOURCE_DATE_EPOCH=$(date -d "${{ inputs.KERNEL_TIME }}" +%s)
           echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
           
       - name: Build Kernel
         run: |
@@ -344,8 +345,6 @@ jobs:
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          cp kernel_workspace/kernel_platform/dist/Image ./AnyKernel3/
-         
-         echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
          
       - name: Upload AnyKernel3
         env:
