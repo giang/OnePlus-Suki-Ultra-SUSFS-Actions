@@ -171,7 +171,8 @@ jobs:
            cd ./common
            
            MODEL="${{ inputs.FEIL }}"
-           if [[ $MODEL =~ oneplus_13 || $MODEL =~ ace5_pro ]]; then
+           #if [[ $MODEL =~ oneplus_13 || $MODEL =~ ace5_pro ]]; then
+           if [[ $MODEL =~ oneplus_13 ]]; then
              FILENAME="50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch"
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
              sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
