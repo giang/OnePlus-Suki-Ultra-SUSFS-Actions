@@ -107,7 +107,7 @@ jobs:
       - name: Initialize repo and sync
         run: |
          mkdir kernel_workspace && cd kernel_workspace
-         repo init -u https://github.com/giang/kernel_manifest.git -b refs/heads/oneplus/${{ github.event.inputs.CPU }} -m ${{ github.event.inputs.FEIL }}.xml --depth=1
+         repo init -u https://github.com/giang/kernel_manifest.git -b refs/heads/oneplus/${{ inputs.CPU }} -m ${{ inputs.FEIL }}.xml --depth=1
          repo --trace sync -c -j$(nproc --all) --no-tags
          rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
          rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
@@ -125,11 +125,11 @@ jobs:
       - name: Set up susfs
         run: |
            cd kernel_workspace
-           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}
+           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}
            git clone https://github.com/ShirkNeko/SukiSU_patch.git
 
            cd kernel_platform
-           cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch ./common/
+           cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch ./common/
            cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
            cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
            
@@ -142,20 +142,20 @@ jobs:
            # Apply patches
            cd ./common
            
-           MODEL="${{ github.event.inputs.FEIL }}"
+           MODEL="${{ inputs.FEIL }}"
            if [[ $MODEL =~ oneplus_13 ]]; then
-             FILENAME="50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch"
+             FILENAME="50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch"
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
              sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
            fi
 
-           patch -p1 < 50_add_susfs_in_gki-${{ github.event.inputs.ANDROID_VERSION }}-${{ github.event.inputs.KERNEL_VERSION }}.patch || true
+           patch -p1 < 50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
            patch -p1 -F 3 < syscall_hooks.patch
            echo "完成"
 
       - name: Apply HMBird GKI patch
-        if: ${{ github.event.inputs.FEIL == 'oneplus_ace5_pro' }} 
+        if: ${{ inputs.FEIL == 'oneplus_ace5_pro' }} 
         run: |
          cd kernel_workspace/kernel_platform/common/drivers
          cat << 'EOF' > hmbird_patch.c
@@ -242,7 +242,7 @@ jobs:
         if: ${{ inputs.enable_feature_y }}
         run: |
           cd kernel_workspace/kernel_platform/common
-            cp ../../SukiSU_patch/other/zram/zram_patch/${{ github.event.inputs.KERNEL_VERSION }}/lz4kd.patch ./
+            cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.KERNEL_VERSION }}/lz4kd.patch ./
             patch -p1 -F 3 < lz4kd.patch || true
            
       - name: Add SUSFS Configuration Settings
@@ -296,10 +296,10 @@ jobs:
         run: |
          cd kernel_workspace/kernel_platform
          #sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
-         #sudo sed -i 's/-4k/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
+         #sudo sed -i 's/-4k/${{ inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
          
          sed -i 's/res="\$res\$(cat "\$file")"/res="-android15-8-g013ec21bba94-abogki383916444"/g' ./common/scripts/setlocalversion
-         sudo sed -i 's/-android15-8-g013ec21bba94-abogki383916444/${{ github.event.inputs.KERNEL_NAME }}/g' ./common/scripts/setlocalversion
+         sudo sed -i 's/-android15-8-g013ec21bba94-abogki383916444/${{ inputs.KERNEL_NAME }}/g' ./common/scripts/setlocalversion
 
       - name: Add Fengchi
         if: ${{inputs.enable_feature_z }}
@@ -312,7 +312,7 @@ jobs:
 
       - name: Set Kernel build timestamp
         run: |
-          export SOURCE_DATE_EPOCH=$(date -d "${{ github.event.inputs.KERNEL_TIME }}" +%s)
+          export SOURCE_DATE_EPOCH=$(date -d "${{ inputs.KERNEL_TIME }}" +%s)
           echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
           
       - name: Build Kernel
@@ -323,8 +323,8 @@ jobs:
            
       - name: Apply Linux Patch
         run: |
-         MODEL="${{ github.event.inputs.FEIL }}"
-         if [ "$MODEL" == "oneplus_ace5_pro" ]; then
+         MODEL="${{ inputs.FEIL }}"
+         if [[ "$MODEL" == "oneplus_ace5_pro" ]]; then
              cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
          else
              cd kernel_workspace/kernel_platform/dist/
@@ -337,8 +337,8 @@ jobs:
          
       - name: Make AnyKernel3
         env:
-          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
-          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
          git clone https://github.com/HanKuCha/AnyKernel3.git --depth=1      
          rm -rf ./AnyKernel3/.git
@@ -349,7 +349,7 @@ jobs:
          
       - name: Upload AnyKernel3
         env:
-          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
         with:
          name: ${{ env.ANYKERNEL3_FILE }}
@@ -357,7 +357,7 @@ jobs:
         
       - name: Upload Image
         env:
-          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
         with:
          name: ${{ env.IMG_FILE }}
@@ -370,23 +370,23 @@ jobs:
 
       - name: Zip AnyKernel3 & Image
         env:
-          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
-          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
            cd download
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
-           cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ github.event.inputs.FEIL }}_boot.img
+           cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
            #ls -R
 
       - name: 🧧 Create GitHub Release
         env:
-          IMG_FILE: "${{ github.event.inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
-          ANYKERNEL3_FILE: "${{ github.event.inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ github.event.inputs.ANDROID_VERSION }}_${{ github.event.inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         continue-on-error: true
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
+          tag_name: ${{ inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
           #files: "${{ env.ANYKERNEL3_FILE }}.zip"
           files: |
             download/*.zip
