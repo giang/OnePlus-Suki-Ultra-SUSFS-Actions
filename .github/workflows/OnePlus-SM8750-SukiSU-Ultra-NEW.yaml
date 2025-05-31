@@ -49,7 +49,7 @@ on:
       KERNEL_NAME:
         description: "Tên kernel"
         required: true
-        default: '-android15-Giang-TechsReview'
+        default: '-android15-8-giang@techs.review'
       KERNEL_TIME:
        description: "Ngày build kernel"
        required: true
