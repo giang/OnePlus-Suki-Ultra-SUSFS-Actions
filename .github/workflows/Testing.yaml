@@ -383,7 +383,8 @@ jobs:
          name: ${{ env.ANYKERNEL3_FILE }}
          path: ./AnyKernel3/*
         
-      - name: Upload Image
+      - name: Upload Image (Ace 5)
+        if: ${{ inputs.FEIL == 'oneplus_ace5' }}
         env:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
@@ -391,6 +392,14 @@ jobs:
          name: ${{ env.IMG_FILE }}
          path: kernel_workspace/kernel_platform/dist/Image
 
+      - name: Upload Image
+        env:
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        uses: actions/upload-artifact@v4
+        with:
+         name: ${{ env.IMG_FILE }}
+         path: kernel_workspace/kernel_platform/common/out/arch/arm64/boot/Image
+         
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -404,7 +413,12 @@ jobs:
            cd download
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
-           cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
+           MODEL="${{ inputs.FEIL }}"
+           if { [[ "$MODEL" != "oneplus_ace5" ]]; then
+              cp kernel_workspace/kernel_platform/common/out/arch/arm64/boot/boot.img ${{ inputs.FEIL }}_boot.img
+           else
+              cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
+           fi
 
       - name: 🧧 Create GitHub Release
         env:
