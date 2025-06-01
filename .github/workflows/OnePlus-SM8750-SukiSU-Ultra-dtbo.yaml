@@ -1,4 +1,4 @@
-name: NEW OnePlus 13 / Ace 5 Pro / Ace 5 SukiSU Ultra + SUSFS
+name: OnePlus 13 / Ace 5 Pro / Ace 5 SukiSU Ultra + SUSFS (Patch dtbo)
 on:
   workflow_dispatch:
     inputs:
