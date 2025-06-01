@@ -184,7 +184,7 @@ jobs:
            echo "完成"
 
       - name: Apply HMBird GKI patch
-        #if: contains( inputs.FEIL, 'ace5_pro' )
+        if: ${{ inputs.FEIL != 'oneplus_ace5' }}
         run: |
          cd kernel_workspace/kernel_platform/common/drivers
          cat << 'EOF' > hmbird_patch.c
