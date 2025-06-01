@@ -1,0 +1,425 @@
+name: Testing OnePlus 13 / Ace 5 Pro / Ace 5 SukiSU Ultra + SUSFS
+on:
+  workflow_dispatch:
+    inputs:
+      CPU:
+        type: choice
+        description: "Nền tảng"
+        required: true
+        default: 'sm8750'
+        options: 
+         - sm8750
+         - sm8650
+      FEIL:
+        type: choice
+        description: "Model"
+        required: true
+        default: 'oneplus_13'
+        options: 
+         - oneplus_13
+         - oneplus_13_v
+         - oneplus_13t
+         - oneplus_ace5_pro
+         - oneplus_ace5_pro_v
+         - oneplus_ace5
+      CPUD:
+        type: choice
+        description: "Mã điện thoại"
+        required: true
+        default: 'sun'
+        options: 
+         - sun
+         - pineapple
+      ANDROID_VERSION:
+        type: choice
+        description: "Hệ điều hành"
+        required: true
+        default: 'android15'
+        options: 
+         - android15
+         - android14
+      KERNEL_VERSION:
+        type: choice
+        description: "Phiên bản kernel"
+        required: true
+        default: '6.6'
+        options: 
+         - '6.6'
+         - '6.1'
+      KERNEL_NAME:
+        description: "Tên kernel"
+        required: true
+        default: '-android15-8-giang@techs.review'
+      KERNEL_TIME:
+       description: "Ngày build kernel"
+       required: true
+       default: 'Wed Dec 4 02:11:46 UTC 2024'
+      enable_feature_x:
+       description: "Tích hợp KPM"
+       required: false
+       default: true
+       type: boolean
+      enable_feature_y:
+       description: "Tích hợp LZ4KD"
+       required: false
+       default: true
+       type: boolean
+      enable_feature_z:
+       description: "Tích hợp Fengchi"
+       required: false
+       default: true
+       type: boolean
+
+jobs:
+  OnePlus-Kernel-Build:
+    runs-on: ubuntu-latest
+    env:
+      CCACHE_COMPILERCHECK: "%compiler% -dumpmachine; %compiler% -dumpversion"
+      CCACHE_NOHASHDIR: "true"
+      CCACHE_HARDLINK: "true"
+    
+    steps:
+      - name: Set formatted model name
+        run: |
+         case "${{ github.event.inputs.FEIL }}" in
+           oneplus_13)
+            MODEL_NAME="Oneplus 13"
+            ;;
+           oneplus_13_v)
+            MODEL_NAME="Oneplus 13 (Android 15)"
+            ;;
+          oneplus_13t)
+             MODEL_NAME="Oneplus 13T"
+            ;;
+           oneplus_ace5)
+             MODEL_NAME="Oneplus Ace 5"
+             ;;
+           oneplus_ace5_pro)
+            MODEL_NAME="Oneplus Ace 5 Pro"
+            ;;
+           oneplus_ace5_pro_v)
+            MODEL_NAME="Oneplus Ace 5 Pro (Android 15)"
+            ;;
+           *)
+            MODEL_NAME="Unknown Model"
+            ;;
+         esac
+         echo "FEIL_NAME=$MODEL_NAME" >> "$GITHUB_ENV"
+          
+      - name: Maximize build space
+        uses: easimon/maximize-build-space@master
+        with:
+          root-reserve-mb: 8192
+          temp-reserve-mb: 2048
+          remove-dotnet: 'true'
+          remove-android: 'true'
+          remove-haskell: 'true'
+          remove-codeql: 'true'
+          
+      - name: Configure Git
+        run: |
+         git config --global user.name "giang"
+         git config --global user.email "dasklney@giang.us"
+
+      - name: Install dependencies
+        run: |
+         sudo apt update && sudo apt upgrade -y
+         sudo apt install -y python3 git curl libelf-dev lld
+
+      - name: Install repo tool
+        run: |
+         curl https://storage.googleapis.com/git-repo-downloads/repo > ~/repo
+         chmod a+x ~/repo
+         sudo mv ~/repo /usr/local/bin/repo
+
+      - name: Initialize repo and sync
+        run: |
+         mkdir kernel_workspace && cd kernel_workspace
+         repo init -u https://github.com/giang/kernel_manifest.git -b refs/heads/oneplus/${{ inputs.CPU }} -m ${{ inputs.FEIL }}.xml --depth=1
+         repo --trace sync -c -j$(nproc --all) --no-tags
+         rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
+         rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
+         
+      - name: Set up SukiSU
+        run: |
+         cd kernel_workspace/kernel_platform
+         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-dev
+         cd ./KernelSU
+         KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10606)
+         echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
+         export KSU_VERSION=$KSU_VERSION
+         sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
+        
+      - name: Set up susfs
+        run: |
+           cd kernel_workspace
+           git clone https://gitlab.com/simonpunk/susfs4ksu.git -b gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}
+           git clone https://github.com/ShirkNeko/SukiSU_patch.git
+
+           cd kernel_platform
+           cp ../susfs4ksu/kernel_patches/50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch ./common/
+           cp ../susfs4ksu/kernel_patches/fs/* ./common/fs/
+           cp ../susfs4ksu/kernel_patches/include/linux/* ./common/include/linux/
+           
+           #lz4k
+           cp -r ../SukiSU_patch/other/zram/lz4k/include/linux/* ./common/include/linux
+           cp -r ../SukiSU_patch/other/zram/lz4k/lib/* ./common/lib
+           cp -r ../SukiSU_patch/other/zram/lz4k/crypto/* ./common/crypto
+           cp -r ../SukiSU_patch/other/zram/lz4k_oplus ./common/lib/
+           
+           # Apply patches
+           cd ./common
+           
+           MODEL="${{ inputs.FEIL }}"
+           if { [[ "$MODEL" =~ oneplus_13 || "$MODEL" =~ ace5_pro ]]; } && [[ "$MODEL" != "oneplus_13t" ]]; then
+           #if [[ "$MODEL" =~ oneplus_13 || "$MODEL" =~ ace5_pro ]]; then
+             FILENAME="50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch"
+             sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
+             sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
+           fi
+
+           patch -p1 < 50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch || true
+           cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
+           patch -p1 -F 3 < syscall_hooks.patch
+           echo "完成"
+
+      - name: Apply HMBird GKI patch
+        if: contains( inputs.FEIL, 'ace5_pro' )
+        run: |
+         cd kernel_workspace/kernel_platform/common/drivers
+         cat << 'EOF' > hmbird_patch.c
+         #include <linux/init.h>
+         #include <linux/module.h>
+         #include <linux/of.h>
+         #include <linux/slab.h>
+         #include <linux/string.h>
+
+         static int __init hmbird_patch_init(void)
+         {
+             struct device_node *ver_np;
+             const char *type;
+             int ret;
+
+             ver_np = of_find_node_by_path("/soc/oplus,hmbird/version_type");
+             if (!ver_np) {
+                  pr_info("hmbird_patch: version_type node not found\n");
+                  return 0;
+             }
+
+             ret = of_property_read_string(ver_np, "type", &type);
+             if (ret) {
+                  pr_info("hmbird_patch: type property not found\n");
+                  of_node_put(ver_np);
+                  return 0;
+             }
+
+             if (strcmp(type, "HMBIRD_OGKI")) {
+                  of_node_put(ver_np);
+                  return 0;
+             }
+
+             struct property *prop = of_find_property(ver_np, "type", NULL);
+             if (prop) {
+                  struct property *new_prop = kmalloc(sizeof(*prop), GFP_KERNEL);
+                  if (!new_prop) {
+                       pr_info("hmbird_patch: kmalloc for new_prop failed\n");
+                       of_node_put(ver_np);
+                       return 0;
+             }
+             memcpy(new_prop, prop, sizeof(*prop));
+             new_prop->value = kmalloc(strlen("HMBIRD_GKI") + 1, GFP_KERNEL);
+             if (!new_prop->value) {
+                  pr_info("hmbird_patch: kmalloc for new_prop->value failed\n");
+                  kfree(new_prop);
+                  of_node_put(ver_np);
+                  return 0;
+            }
+            strcpy(new_prop->value, "HMBIRD_GKI");
+            new_prop->length = strlen("HMBIRD_GKI") + 1;
+
+            if (of_remove_property(ver_np, prop) != 0) {
+                 pr_info("hmbird_patch: of_remove_property failed\n");
+                 return 0;
+            }
+            if (of_add_property(ver_np, new_prop) !=0) {
+                 pr_info("hmbird_patch: of_add_property failed\n");
+                 return 0;
+            }
+            pr_info("hmbird_patch: success from HMBIRD_OGKI to HMBIRD_GKI\n");
+         }
+         else {
+             pr_info("hmbird_patch: type property structure not found\n");
+         }
+         of_node_put(ver_np);
+         return 0;
+         }
+         early_initcall(hmbird_patch_init);
+         MODULE_LICENSE("GPL");
+         MODULE_AUTHOR("reigadegr");
+         MODULE_DESCRIPTION("Forcefully convert HMBIRD_OGKI to HMBIRD_GKI.");
+         EOF
+         if ! grep -q "hmbird_patch.o" Makefile; then
+         echo "obj-y += hmbird_patch.o" >> Makefile
+         fi
+         cd ../../../
+         git add -A
+         git commit -m "Add HMBird GKI patch" || true
+
+ 
+
+      - name: Apply lz4kd Patches
+        if: ${{ inputs.enable_feature_y }}
+        run: |
+          cd kernel_workspace/kernel_platform/common
+            cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.KERNEL_VERSION }}/lz4kd.patch ./
+            patch -p1 -F 3 < lz4kd.patch || true
+           
+      - name: Add SUSFS Configuration Settings
+        run: |
+          cd kernel_workspace/kernel_platform
+          echo "CONFIG_KSU=y" >> ./common/arch/arm64/configs/gki_defconfig
+
+          # Add VFS configuration settings
+          echo "CONFIG_KSU_SUSFS_SUS_SU=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_MANUAL_HOOK=y" >> ./common/arch/arm64/configs/gki_defconfig
+          
+          # Add SUSFS configuration settings
+          echo "CONFIG_KSU_SUSFS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_HAS_MAGIC_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_PATH=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_KSU_DEFAULT_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_SUS_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_KSTAT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SUS_OVERLAYFS=n" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_TRY_UMOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_AUTO_ADD_TRY_UMOUNT_FOR_BIND_MOUNT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SPOOF_UNAME=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_ENABLE_LOG=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_HIDE_KSU_SUSFS_SYMBOLS=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_SPOOF_CMDLINE_OR_BOOTCONFIG=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_KSU_SUSFS_OPEN_REDIRECT=y" >> ./common/arch/arm64/configs/gki_defconfig
+          
+          echo "CONFIG_CRYPTO_LZ4HC=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4K=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_LZ4KD=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_CRYPTO_842=y" >> ./common/arch/arm64/configs/gki_defconfig
+          
+          #Remove check_defconfig
+          sudo sed -i 's/check_defconfig//' ./common/build.config.gki
+          cd common
+          git add -A && git commit -a -m "BUILD Kernel"
+      
+      - name: Add KPM Configuration Settings
+        if: ${{ inputs.enable_feature_x }}
+        run: |
+          cd kernel_workspace/kernel_platform
+          echo "CONFIG_KPM=y" >> ./common/arch/arm64/configs/gki_defconfig
+         
+          #Remove check_defconfig
+          sudo sed -i 's/check_defconfig//' ./common/build.config.gki
+          cd common
+          git add -A && git commit -a -m "BUILD Kernel"
+          
+      - name: Add kernel custom name
+        run: |
+         cd kernel_workspace/kernel_platform
+         sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
+         sudo sed -i 's/-4k/${{ inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
+
+      - name: Set Kernel build timestamp
+        run: |
+          export SOURCE_DATE_EPOCH=$(date -d "${{ inputs.KERNEL_TIME }}" +%s)
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH" >> $GITHUB_ENV
+          echo "BUILDDATE=$(date +'%Y%m%d')" >> $GITHUB_ENV
+          
+      - name: Build Kernel
+        run: |
+          export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
+          export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
+          export PATH="/usr/lib/ccache:$PATH"
+          sudo apt install libelf-dev
+          cd kernel_workspace/kernel_platform/common
+          make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
+           
+      - name: Apply Linux Patch
+        run: |
+         MODEL="${{ inputs.FEIL }}"
+         cd kernel_workspace/kernel_platform/common/out/arch/arm64/boot
+         curl -LO https://github.com/ShirkNeko/SukiSU_KernelPatch_patch/releases/download/0.11-beta/patch_linux
+         chmod +x patch_linux
+         ./patch_linux
+         rm -f Image
+         mv oImage Image
+         
+      - name: Make AnyKernel3
+        env:
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        run: |
+         git clone https://github.com/Kernel-SU/AnyKernel3.git --depth=1    
+         rm -rf ./AnyKernel3/.git
+         rm -rf ./AnyKernel3/push.sh
+         cp kernel_workspace/kernel_platform/common/out/arch/arm64/boot/Image ./AnyKernel3/
+         
+      - name: Upload AnyKernel3
+        env:
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        uses: actions/upload-artifact@v4
+        with:
+         name: ${{ env.ANYKERNEL3_FILE }}
+         path: ./AnyKernel3/*
+        
+      - name: Upload Image
+        env:
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        uses: actions/upload-artifact@v4
+        with:
+         name: ${{ env.IMG_FILE }}
+         path: kernel_workspace/kernel_platform/dist/Image
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: download
+
+      - name: Zip AnyKernel3 & Image
+        env:
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+        run: |
+           cd download
+           cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
+           cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
+           cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
+
+      - name: 🧧 Create GitHub Release
+        env:
+          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+          RELEASE_NAME: "${{env.FEIL_NAME}} Kernel - GKI/SukiSU Ultra/SUSFS"
+          RELEASE_NOTES: |
+           This release contains SukiSU Ultra and SUSFS for ${{ env.FEIL_NAME }}
+           
+           Features:
+           -> SukiSU Ultra | KPM | LZ4KD | Fengchi
+           -> SUSFS ඞ
+           -> Manual Hooks for Better Hiding
+           
+           Notes:
+           -> SUS SU Mode 2 will show as disabled or not compatble due to non-kprobe hooks and is not needed anymore!
+           -> Kernel Flasher is broken with latest susfs, try https://github.com/libxzr/HorizonKernelFlasher!
+           
+           Module:
+           -> SukiSU Ultra Manager v3.1.3: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.3/SukiSU_v3.1.3_12905-release.apk
+           -> SUSFS Module: https://github.com/sidex15/ksu_module_susfs
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.FEIL }}-SukiSU_Ultra-v${{ env.BUILDDATE }}.${{ github.run_number }}
+          files: |
+            download/*.zip
+            download/*.img
+          generate_release_notes: true
+          name: ${{ env.RELEASE_NAME }}  # Pass the RELEASE_NAME to the action
+          body: ${{ env.RELEASE_NOTES }}  # Pass the RELEASE_NOTES to the action
