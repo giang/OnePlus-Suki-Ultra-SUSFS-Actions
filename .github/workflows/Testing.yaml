@@ -414,7 +414,7 @@ jobs:
         with:
           path: download
 
-      - name: Zip AnyKernel3 & Image
+      - name: Zip AnyKernel3
         env:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
@@ -422,12 +422,6 @@ jobs:
            cd download
            cd ${{ env.IMG_FILE }} ; zip -r ../${{ env.IMG_FILE }}.zip . * ; cd ..
            cd ${{ env.ANYKERNEL3_FILE }} ; zip -r ../${{ env.ANYKERNEL3_FILE }}.zip . * ; cd ..
-           MODEL="${{ inputs.FEIL }}"
-           if [[ "$MODEL" != "oneplus_ace5" ]]; then
-              cp kernel_workspace/kernel_platform/common/out/arch/arm64/boot/boot.img ${{ inputs.FEIL }}_boot.img
-           else
-              cp ../kernel_workspace/kernel_platform/dist/boot.img ${{ inputs.FEIL }}_boot.img
-           fi
 
       - name: 🧧 Create GitHub Release
         env:
