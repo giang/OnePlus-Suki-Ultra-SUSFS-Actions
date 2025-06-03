@@ -310,6 +310,7 @@ jobs:
           echo "CONFIG_CRYPTO_LZ4K=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_LZ4KD=y" >> ./common/arch/arm64/configs/gki_defconfig
           echo "CONFIG_CRYPTO_842=y" >> ./common/arch/arm64/configs/gki_defconfig
+          echo "CONFIG_LOCALVERSION_AUTO=n" >> ./common/arch/arm64/configs/gki_defconfig
           
           #Remove check_defconfig
           sudo sed -i 's/check_defconfig//' ./common/build.config.gki
@@ -334,7 +335,7 @@ jobs:
          sudo sed -i 's/-4k/${{ inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
 
       - name: Add Fengchi
-        if: ${{ inputs.enable_feature_z == 'true' && inputs.FEIL != 'oneplus_ace5' }}
+        if: ${{ inputs.enable_feature_z && inputs.FEIL != 'oneplus_ace5' }}
         run: |
          cd kernel_workspace/kernel_platform/
          git clone https://github.com/HanKuCha/sched_ext.git
