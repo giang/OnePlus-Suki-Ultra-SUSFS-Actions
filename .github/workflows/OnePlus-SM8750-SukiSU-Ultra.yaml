@@ -333,6 +333,15 @@ jobs:
          sed -i 's/${scm_version}//' ./common/scripts/setlocalversion
          sudo sed -i 's/-4k/${{ inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
 
+      - name: Add Fengchi
+        if: ${{inputs.enable_feature_z }}
+        run: |
+         cd kernel_workspace/kernel_platform/
+         git clone https://github.com/HanKuCha/sched_ext.git
+         cp -r ./sched_ext/* ./common/kernel/sched
+         rm -rf ./sched_ext/.git
+         cd common/kernel/sched
+
       - name: Set Kernel build timestamp
         run: |
           export SOURCE_DATE_EPOCH=$(date -d "${{ inputs.KERNEL_TIME }}" +%s)
@@ -348,7 +357,7 @@ jobs:
             export PATH="/usr/lib/ccache:$PATH"
             sudo apt install libelf-dev
             cd kernel_workspace/kernel_platform/common
-            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-Wno-error gki_defconfig all
+            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
           else
             export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
             cd kernel_workspace/kernel_platform
