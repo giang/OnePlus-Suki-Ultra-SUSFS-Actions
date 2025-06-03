@@ -130,10 +130,10 @@ jobs:
       - name: Restore ccache
         uses: actions/cache@v3
         with:
-          path: /home/runner/.ccache-${{ inputs.FEIL }}
-          key: ccache-${{ runner.os }}-${{ github.ref }}
+          path: /home/runner/.ccache
+          key: ccache-${{ runner.os }}-${{ github.ref }}-${{ inputs.FEIL }}
           restore-keys: |
-            ccache-${{ runner.os }}-
+            ccache-${{ runner.os }}-${{ inputs.FEIL }}
 
       - name: Install repo tool
         run: |
