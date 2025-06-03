@@ -384,7 +384,9 @@ jobs:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
           ANYKERNEL3_FILE: "${{ inputs.FEIL }}_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         run: |
-         git clone https://github.com/Kernel-SU/AnyKernel3.git --depth=1    
+         #git clone https://github.com/Kernel-SU/AnyKernel3.git --depth=1
+         # Patch dtbo via Anykernel3 scripts
+         git clone https://github.com/HanKuCha/AnyKernel3.git --depth=1
          rm -rf ./AnyKernel3/.git
          rm -rf ./AnyKernel3/push.sh
          MODEL="${{ inputs.FEIL }}"
