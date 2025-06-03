@@ -65,9 +65,9 @@ on:
        default: true
        type: boolean
       enable_feature_z:
-       description: "Tích hợp Fengchi"
+       description: "Tích hợp Fengchi driver"
        required: false
-       default: true
+       default: false
        type: boolean
 
 jobs:
