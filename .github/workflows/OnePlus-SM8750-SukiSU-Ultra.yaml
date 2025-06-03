@@ -82,7 +82,7 @@ jobs:
     steps:
       - name: Set formatted model name
         run: |
-         case "${{ github.event.inputs.FEIL }}" in
+         case "${{ inputs.FEIL }}" in
            oneplus_13)
             MODEL_NAME="Oneplus 13"
             ;;
@@ -130,7 +130,7 @@ jobs:
       - name: Restore ccache
         uses: actions/cache@v3
         with:
-          path: /home/runner/.ccache
+          path: /home/runner/.ccache-${{ inputs.FEIL }}
           key: ccache-${{ runner.os }}-${{ github.ref }}
           restore-keys: |
             ccache-${{ runner.os }}-
