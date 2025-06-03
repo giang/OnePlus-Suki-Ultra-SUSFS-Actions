@@ -412,6 +412,7 @@ jobs:
          path: kernel_workspace/kernel_platform/dist/Image
 
       - name: Upload Image
+        if: ${{ inputs.FEIL != 'oneplus_ace5' }}
         env:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
