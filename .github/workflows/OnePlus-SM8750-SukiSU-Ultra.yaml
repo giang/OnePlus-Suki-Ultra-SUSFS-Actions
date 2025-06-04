@@ -186,10 +186,14 @@ jobs:
              sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
            fi
 
+           # Hide stuffs
+           cp ../../SukiSU_patch/69_hide_stuff.patch ./
+           patch -p1 -F 3 < 69_hide_stuff.patch
+           
            patch -p1 < 50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch || true
            cp ../../SukiSU_patch/hooks/syscall_hooks.patch ./
            patch -p1 -F 3 < syscall_hooks.patch
-           echo "完成"
+           echo "Patch completed"
 
       - name: Apply HMBird GKI patch
         if: ${{ inputs.FEIL != 'oneplus_ace5' }}
@@ -278,7 +282,15 @@ jobs:
         run: |
           cd kernel_workspace/kernel_platform/common
             cp ../../SukiSU_patch/other/zram/zram_patch/${{ inputs.KERNEL_VERSION }}/lz4kd.patch ./
+            echo "Applying lz4kd patch"
             patch -p1 -F 3 < lz4kd.patch || true
+            echo 'lz4kd_patch completed'
+            
+            cp ../../SukiSU_patch/other/zram/zram_patch/${{ github.event.inputs.KERNEL_VERSION }}/lz4k_oplus.patch ./
+            echo "Applying lz4k_oplus patch"
+            patch -p1 -F 3 < lz4k_oplus.patch || true
+            echo 'lz4k_oplus_patch completed'
+
            
       - name: Add SUSFS Configuration Settings
         run: |
@@ -335,13 +347,15 @@ jobs:
          sudo sed -i 's/-4k/${{ inputs.KERNEL_NAME }}/g' ./common/arch/arm64/configs/gki_defconfig
 
       - name: Add Fengchi
-        if: ${{ inputs.enable_feature_z && inputs.FEIL != 'oneplus_ace5' }}
+        if: ${{ inputs.KERNEL_VERSION == '6.6' }}
         run: |
          cd kernel_workspace/kernel_platform/
-         git clone https://github.com/HanKuCha/sched_ext.git
+         #git clone https://github.com/HanKuCha/sched_ext.git
+         git clone https://github.com/AQ16/sched_ext.git
          cp -r ./sched_ext/* ./common/kernel/sched
          rm -rf ./sched_ext/.git
          cd common/kernel/sched
+         sed -i.bak '/# include "ext.c"/a\# include "hmbird_sched_proc_main.c"\n#endif\n\n#ifdef CONFIG_SLIM_SCHED\n# include "slim_sysctl.c"' build_policy.c
 
       - name: Set Kernel build timestamp
         run: |
