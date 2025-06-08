@@ -128,12 +128,12 @@ jobs:
          sudo apt install -y python3 git curl libelf-dev lld ccache
 
       - name: Restore ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: /home/runner/.ccache
           key: ccache-${{ runner.os }}-${{ github.ref }}-${{ inputs.FEIL }}
           restore-keys: |
-            ccache-${{ runner.os }}-${{ inputs.FEIL }}
+            ccache-${{ runner.os }}-${{ inputs.FEIL }}-
 
       - name: Install repo tool
         run: |
