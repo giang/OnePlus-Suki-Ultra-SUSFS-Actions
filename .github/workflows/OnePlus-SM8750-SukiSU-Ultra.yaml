@@ -468,7 +468,7 @@ jobs:
            -> Kernel Flasher is broken with latest susfs, try https://github.com/libxzr/HorizonKernelFlasher!
            
            Module:
-           -> SukiSU Ultra Manager v3.1.3: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.3/SukiSU_v3.1.3_12905-release.apk
+           -> SukiSU Ultra Manager v3.1.9: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.9/SukiSU_v3.1.9_13307-release.apk
            -> SUSFS Module: https://github.com/sidex15/ksu_module_susfs
         continue-on-error: true
         uses: softprops/action-gh-release@v2
