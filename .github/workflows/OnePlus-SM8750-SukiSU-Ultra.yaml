@@ -125,7 +125,7 @@ jobs:
       - name: Install dependencies
         run: |
          sudo apt update && sudo apt upgrade -y
-         sudo apt install -y lld python3 p7zip-full git curl ccache libelf-dev build-essential \
+         sudo apt install -y bc lld python3 p7zip-full git curl ccache libelf-dev build-essential \
             flex bison libssl-dev libncurses-dev liblz4-tool zlib1g-dev libxml2-utils rsync unzip
 
       - name: Restore ccache
