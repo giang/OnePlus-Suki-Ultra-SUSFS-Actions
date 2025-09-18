@@ -125,8 +125,7 @@ jobs:
       - name: Install dependencies
         run: |
          sudo apt update && sudo apt upgrade -y
-         sudo apt install -y bc lld python3 p7zip-full git curl ccache libelf-dev build-essential \
-            flex bison libssl-dev libncurses-dev liblz4-tool zlib1g-dev libxml2-utils rsync unzip
+         sudo apt install -y python3 git curl libelf-dev lld ccache
 
       - name: Restore ccache
         uses: actions/cache@v4
@@ -156,11 +155,11 @@ jobs:
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s susfs-main
          cd ./KernelSU
          KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10606)
+         #KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10700)
          echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-         
          export KSU_VERSION=$KSU_VERSION
          sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
-
+        
       - name: Set up susfs
         run: |
            cd kernel_workspace
@@ -182,7 +181,7 @@ jobs:
            cd ./common
            
            MODEL="${{ inputs.FEIL }}"
-           if { [[ "$MODEL" =~ oneplus_13 || "$MODEL" =~ ace5_pro ]] } && [[ "$MODEL" != "oneplus_13t" ]]; then
+           if { [[ "$MODEL" =~ oneplus_13 || "$MODEL" =~ ace5_pro ]]; } && [[ "$MODEL" != "oneplus_13t" ]]; then
              FILENAME="50_add_susfs_in_gki-${{ inputs.ANDROID_VERSION }}-${{ inputs.KERNEL_VERSION }}.patch"
              sed -i 's/-32,12 +32,38/-32,11 +32,37/g' "$FILENAME"
              sed -i '/#include <trace\/hooks\/fs.h>/d' "$FILENAME"
@@ -369,9 +368,9 @@ jobs:
         run: |
           MODEL="${{ inputs.FEIL }}"
           if [[ "$MODEL" != "oneplus_ace5" ]]; then
-            export KBUILD_BUILD_TIMESTAMP="${{ inputs.KERNEL_TIME }}"
+            export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
             export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-            export PATH="/usr/lib/ccache:$PATH
+            export PATH="/usr/lib/ccache:$PATH"
             sudo apt install libelf-dev
             cd kernel_workspace/kernel_platform/common
             make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
