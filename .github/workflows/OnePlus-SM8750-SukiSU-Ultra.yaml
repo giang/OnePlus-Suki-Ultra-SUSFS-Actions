@@ -370,32 +370,12 @@ jobs:
           MODEL="${{ inputs.FEIL }}"
           if [[ "$MODEL" != "oneplus_ace5" ]]; then
             export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
-            #export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-            CLANG_PREBUILT_ROOT="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86"
-            CLANG_BIN_DIR=""
-            for DIR in "$CLANG_PREBUILT_ROOT"/clang-r*/bin; do
-              if [ -d "$DIR" ]; then
-                CLANG_BIN_DIR="$DIR"
-                break
-              fi
-            done
-            if [ -z "$CLANG_BIN_DIR" ]; then
-              echo "::error ::Unable to locate Clang toolchain under $CLANG_PREBUILT_ROOT"
-              exit 1
-            fi
-            echo "Using Clang toolchain from $CLANG_BIN_DIR"
-            export PATH="$CLANG_BIN_DIR:$PATH"
+            export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
             export PATH="/usr/lib/ccache:$PATH
           
             sudo apt install libelf-dev
             cd kernel_workspace/kernel_platform/common
-            #make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
-            RUSTC_BIN=$(find ../../prebuilts/rust/linux-x86 -maxdepth 3 -type f -name rustc -print -quit)
-            if [[ -z "$RUSTC_BIN" ]]; then
-              echo "rustc binary not found under ../../prebuilts/rust/linux-x86" >&2
-              exit 1
-            fi
-            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=$RUSTC_BIN PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
+            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
           else
             export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
             export KBUILD_BUILD_TIMESTAMP="${{ inputs.KERNEL_TIME }}"
