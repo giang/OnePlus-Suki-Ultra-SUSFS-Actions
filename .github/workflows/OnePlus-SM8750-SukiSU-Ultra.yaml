@@ -368,25 +368,26 @@ jobs:
           
       - name: Build Kernel
         run: |
-          MODEL="${{ inputs.FEIL }}"
-          if [[ "$MODEL" != "oneplus_ace5" ]]; then
-            export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
-            export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
-            export PATH="/usr/lib/ccache:$PATH"
-            sudo apt install libelf-dev
-            #cd kernel_workspace/kernel_platform/common
-            #make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
-            cd kernel_workspace/kernel_platform
-            make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
-              CC="ccache clang" \
-              RUSTC=./prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
-              PAHOLE=./prebuilts/kernel-build-tools/linux-x86/bin/pahole \
-              LD=ld.lld HOSTLD=ld.lld O=common/out KCFLAGS+=-O2 gki_defconfig all
-          else
+          #MODEL="${{ inputs.FEIL }}"
+          #if [[ "$MODEL" != "oneplus_ace5" ]]; then
+          #  export KBUILD_BUILD_TIMESTAMP="${{ github.event.inputs.KERNEL_TIME }}"
+          #  export PATH="$GITHUB_WORKSPACE/kernel_workspace/kernel_platform/prebuilts/clang/host/linux-x86/clang-r510928/bin:$PATH"
+          #  export PATH="/usr/lib/ccache:$PATH"
+          #  sudo apt install libelf-dev
+          #  #cd kernel_workspace/kernel_platform/common
+          #  #make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- CC=clang RUSTC=../../prebuilts/rust/linux-x86/1.73.0b/bin/rustc PAHOLE=../../prebuilts/kernel-build-tools/linux-x86/bin/pahole LD=ld.lld  HOSTLD=ld.lld O=out KCFLAGS+=-O2 gki_defconfig all
+          #  cd kernel_workspace/kernel_platform
+          #  make -j$(nproc --all) LLVM=1 ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- \
+          #    CC="ccache clang" \
+          #    RUSTC=./prebuilts/rust/linux-x86/1.73.0b/bin/rustc \
+          #    PAHOLE=./prebuilts/kernel-build-tools/linux-x86/bin/pahole \
+          #    LD=ld.lld HOSTLD=ld.lld O=common/out KCFLAGS+=-O2 gki_defconfig all
+          #else
             export SOURCE_DATE_EPOCH=${SOURCE_DATE_EPOCH}
+            export KBUILD_BUILD_TIMESTAMP="${{ inputs.KERNEL_TIME }}"
             cd kernel_workspace/kernel_platform
             tools/bazel run --config=fast --config=stamp --lto=thin //common:kernel_aarch64_dist -- --dist_dir=dist
-          fi
+          #fi
            
       - name: Apply Linux Patch
         run: |
@@ -428,7 +429,7 @@ jobs:
          path: ./AnyKernel3/*
         
       - name: Upload Image (Ace 5)
-        if: ${{ inputs.FEIL == 'oneplus_ace5' }}
+        #if: ${{ inputs.FEIL == 'oneplus_ace5' }}
         env:
           IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
         uses: actions/upload-artifact@v4
@@ -436,14 +437,14 @@ jobs:
          name: ${{ env.IMG_FILE }}
          path: kernel_workspace/kernel_platform/dist/Image
 
-      - name: Upload Image
-        if: ${{ inputs.FEIL != 'oneplus_ace5' }}
-        env:
-          IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
-        uses: actions/upload-artifact@v4
-        with:
-         name: ${{ env.IMG_FILE }}
-         path: kernel_workspace/kernel_platform/common/out/arch/arm64/boot/Image
+      #- name: Upload Image
+      #  if: ${{ inputs.FEIL != 'oneplus_ace5' }}
+      #  env:
+      #    IMG_FILE: "${{ inputs.FEIL }}_Image_SukiSU_Ultra_${{ env.KSUVER }}_${{ inputs.ANDROID_VERSION }}_${{ inputs.KERNEL_VERSION }}-${{ env.BUILDDATE }}"
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #   name: ${{ env.IMG_FILE }}
+      #   path: kernel_workspace/kernel_platform/common/out/arch/arm64/boot/Image
          
       - name: Download artifacts
         uses: actions/download-artifact@v4
