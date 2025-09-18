@@ -147,8 +147,8 @@ jobs:
          mkdir kernel_workspace && cd kernel_workspace
          repo init -u https://github.com/giang/kernel_manifest.git -b refs/heads/oneplus/${{ inputs.CPU }} -m ${{ inputs.FEIL }}.xml --depth=1
          repo --trace sync -c -j$(nproc --all) --no-tags
-         rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
-         rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
+         #rm kernel_platform/common/android/abi_gki_protected_exports_* || echo "No protected exports!"
+         #rm kernel_platform/msm-kernel/android/abi_gki_protected_exports_* || echo "No protected exports!"
          
       - name: Set up SukiSU
         run: |
