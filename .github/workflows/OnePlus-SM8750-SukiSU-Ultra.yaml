@@ -158,13 +158,18 @@ jobs:
       - name: Set up SukiSU
         run: |
          cd kernel_workspace/kernel_platform
-         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
-         cd ./KernelSU
-         #KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10606)
-         KSU_VERSION=$(expr $(/usr/bin/git rev-list --count main) "+" 10700)
+         curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/susfs-main/kernel/setup.sh" -o setup.sh && bash setup.sh susfs-main
+         cd KernelSU
+         KSU_VERSION=$(expr $(git rev-list --count main 2>/dev/null || echo 13000) + 10700)
          echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-         export KSU_VERSION=$KSU_VERSION
-         sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
+         cp "${GITHUB_WORKSPACE}/.github/workflows/Bin/setup.bin" ./
+         chmod +x setup.bin
+         if [ ! -f "kernel/Makefile" ]; then
+           echo "::error ::kernel/Makefile"
+           ls -la
+           exit 1
+         fi
+         ./setup.bin
         
       - name: Set up susfs
         run: |
@@ -475,7 +480,7 @@ jobs:
            -> Kernel Flasher is broken with latest susfs, try https://github.com/libxzr/HorizonKernelFlasher!
            
            Module:
-           -> SukiSU Ultra Manager v3.1.9: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.1.9/SukiSU_v3.1.9_13307-release.apk
+           -> SukiSU Ultra Manager v3.2.0: https://github.com/SukiSU-Ultra/SukiSU-Ultra/releases/download/v3.2.0/SukiSU_v3.2.0_13375-release.apk
            -> SUSFS Module: https://github.com/sidex15/ksu_module_susfs
         continue-on-error: true
         uses: softprops/action-gh-release@v2
