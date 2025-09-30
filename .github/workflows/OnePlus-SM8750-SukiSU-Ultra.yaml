@@ -159,17 +159,11 @@ jobs:
         run: |
          cd kernel_workspace/kernel_platform
          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/susfs-main/kernel/setup.sh" -o setup.sh && bash setup.sh susfs-main
-         cd KernelSU
+         cd ./KernelSU
          KSU_VERSION=$(expr $(git rev-list --count main 2>/dev/null || echo 13000) + 10700)
          echo "KSUVER=$KSU_VERSION" >> $GITHUB_ENV
-         cp "${GITHUB_WORKSPACE}/.github/workflows/Bin/setup.bin" ./
-         chmod +x setup.bin
-         if [ ! -f "kernel/Makefile" ]; then
-           echo "::error ::kernel/Makefile"
-           ls -la
-           exit 1
-         fi
-         ./setup.bin
+         export KSU_VERSION=$KSU_VERSION
+         sed -i "s/DKSU_VERSION=12800/DKSU_VERSION=${KSU_VERSION}/" kernel/Makefile
         
       - name: Set up susfs
         run: |
