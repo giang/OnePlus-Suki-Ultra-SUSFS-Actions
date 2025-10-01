@@ -53,7 +53,7 @@ on:
       KERNEL_TIME:
        description: "Ngày build kernel"
        required: true
-       default: 'Tue Dec 17 23:36:49 UTC 2024'
+       default: 'Tue Jul  1 19:48:18 UTC 2025'
       enable_feature_x:
        description: "Tích hợp KPM"
        required: false
