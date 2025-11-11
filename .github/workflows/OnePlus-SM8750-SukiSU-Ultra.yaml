@@ -17,7 +17,7 @@ on:
         default: 'oneplus_13'
         options: 
          - oneplus_13
-         - oneplus_13_w
+         - oneplus_13_b
          - oneplus_13_global
          - oneplus_13t
          - oneplus_ace5_pro
