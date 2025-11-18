@@ -87,7 +87,7 @@ jobs:
            oneplus_13)
             MODEL_NAME="Oneplus 13"
             ;;
-            oneplus_13_w)
+            oneplus_13_b)
             MODEL_NAME="Oneplus 13 (Android 16)"
             ;;
            oneplus_13_v)
