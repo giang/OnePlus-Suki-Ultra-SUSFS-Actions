@@ -14,7 +14,7 @@ on:
         type: choice
         description: "Model"
         required: true
-        default: 'oneplus_13'
+        default: 'oneplus_13_b'
         options: 
          - oneplus_13
          - oneplus_13_b
